@@ -1,0 +1,32 @@
+<head>
+    <meta charset="utf-8">
+    <script type="text/javascript">
+        function next()
+        {
+            var sum = Math.floor(Math.random() * 100);
+            var v1 = Math.floor(Math.random() * sum);
+            var v2 = sum - v1;
+
+            var op = Math.random() < 0.5 ? '+' : '-';
+
+            if(op == '+')
+            {
+                document.getElementById("v").innerText = v1 + "+" + v2 + "=?";
+            }else{
+                document.getElementById("v").innerText = sum + "-" + v2 + "=?";
+            }
+        }
+
+    </script>
+    <style type="text/css">
+        #v{
+            font-size: 60pt;   
+            text-align: center;     
+            padding-top: 200px;
+            padding-bottom: 200px;    
+        }
+    </style>
+</head>
+<body style="margin: auto; width: 50%">
+    <div id="v" onclick="next()">点击出题</div>
+</body>
