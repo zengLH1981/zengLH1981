@@ -11,10 +11,19 @@
 
             if(op == '+')
             {
-                document.getElementById("v").innerText = v1 + "+" + v2 + "=?";
+                return v1 + "+" + v2 + "=?";
             }else{
-                document.getElementById("v").innerText = sum + "-" + v2 + "=?";
+                return sum + "-" + v2 + "=?";
             }
+        }
+
+        function nextN(n) {
+            var arr = [];
+            for(var i = 0;i < n; i ++){
+                arr[i] = next();
+            }
+
+            document.getElementById("v").innerText = arr.join("\n");
         }
 
     </script>
@@ -22,11 +31,11 @@
         #v{
             font-size: 60pt;   
             text-align: center;     
-            padding-top: 200px;
+            padding-top: 30px;
             padding-bottom: 200px;    
         }
     </style>
 </head>
 <body style="margin: auto; width: 50%">
-    <div id="v" onclick="next()">点击出题</div>
+    <per id="v" onclick="nextN(5)">点击出题</per>
 </body>
