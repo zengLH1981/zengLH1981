@@ -1,0 +1,52 @@
+<head>
+    <meta charset="utf-8">
+    <script type="text/javascript">
+        function makenum(x)
+        {
+            var sum = Math.floor(Math.random() * 100);
+            if(sum > x)
+            {
+                return sum + "-" + (sum - x);
+            }else{
+                return sum + "+" + (x - sum);
+            }
+        }
+        function next()
+        {
+            var sum = Math.floor(Math.random() * 100);
+            var v1 = Math.floor(Math.random() * sum);
+            var v2 = sum - v1;
+
+            var op = Math.random() < 0.5 ? '+' : '-';
+
+            if(op == '+')
+            {
+                return makenum(v1) + "+" + v2 + "=?";
+            }else{
+                return makenum(sum) + "-" + v2 + "=?";
+            }
+
+        }
+
+        function nextN(n) {
+            var arr = [];
+            for(var i = 0;i < n; i ++){
+                arr[i] = next();
+            }
+
+            document.getElementById("v").innerText = arr.join("\n");
+        }
+
+    </script>
+    <style type="text/css">
+        #v{
+            font-size: 60pt;   
+            text-align: center;     
+            padding-top: 30px;
+            padding-bottom: 200px;    
+        }
+    </style>
+</head>
+<body style="margin: auto; width: 50%">
+    <per id="v" onclick="nextN(15)">点击出题</per>
+</body>
