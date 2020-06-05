@@ -1,0 +1,53 @@
+<head>
+    <meta charset="utf-8">
+    <script type="text/javascript">
+        function next()
+        {
+            var sum = Math.floor(Math.random() * 18) + 2;
+            var v1 = Math.floor(Math.random() * (sum - 1)) + 1;
+            if((sum & 1) || (v1 & 1))
+            {
+
+            }else{
+                v1 ++;
+            }
+            var v2 = sum - v1;
+
+            var op = '+'//Math.random() < 0.5 ? '+' : '-';
+
+            if(op == '+')
+            {
+                return (5*v1) + "+" + (5*v2) + "=?";
+            }else{
+                return sum + "-" + v2 + "=?";
+            }
+        }
+
+        function nextN(n) {
+            var arr = [];
+            for(var i = 0;i < n; i ++){
+                arr[i] = next();
+            }
+
+            document.getElementById("v").innerText = arr.join("\n");
+        }
+
+    </script>
+    <style type="text/css">
+        #v{
+            font-size: 60pt;   
+            text-align: center;     
+            padding-top: 30px;
+            padding-bottom: 200px;    
+            text-shadow: 0 0 10px #000, 0 0 5px #00f; 
+            color: #ffffff;
+        }
+
+        body{
+            background: url("http://pic127.huitu.com/res/20190812/1165712_20190812212845785070_1.jpg")
+        }
+    </style>
+</head>
+<body style="margin: auto; width: 50%">
+    <per id="v" onclick="nextN(5)">点击出题</per>
+</body>
