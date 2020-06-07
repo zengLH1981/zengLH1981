@@ -18,7 +18,7 @@
                 return ten + (sum + "-" + v2 + "=?");
             }
         }
-        
+
         function nextN(n) {
             var arr = [];
             for(var i = 0;i < n; i ++){
@@ -28,13 +28,48 @@
             document.getElementById("v").innerText = arr.join("\n");
         }
 
+        var start = 0; 
+        function cd() {
+            
+            if(start)
+            {
+
+                var off = Date.now() - start;
+
+                document.getElementById("cd").innerText =  off / 1000;   
+                start = 0;
+            }else{
+                start = Date.now();
+
+                document.getElementById("cd").innerText =  "点击停止";  
+
+            }
+            
+        }
+
+            // setInterval(()=>{
+            //     if(start){
+            //         var off = Date.now() - start;
+
+            //         document.getElementById("cd").innerText =  off / 1000;    
+            //     }
+            // }, 100);
+
     </script>
     <style type="text/css">
         #v{
             font-size: 15vw;   
             text-align: center;     
-            padding-top: 10vw;
+            padding-top: 1vw;
             padding-bottom: 20vw;    
+            text-shadow: 0 0 1vw #000, 0 0 5vw #00f; 
+            color: #ffffff;
+        }
+        #cd{
+            font-size: 15vw;   
+            text-align: center;     
+            padding-top: 1vw;
+            padding-bottom: 1vw;    
             text-shadow: 0 0 1vw #000, 0 0 5vw #00f; 
             color: #ffffff;
         }
@@ -48,5 +83,8 @@
     </style>
 </head>
 <body style="margin: auto; text-align: center; ">
+    <div id="cd" onclick="cd()">开始计时</div><br />
     <per id="v" onclick="nextN(8)">点击出题</per>
+
+
 </body>
