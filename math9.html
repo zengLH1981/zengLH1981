@@ -1,0 +1,52 @@
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript">
+        function next()
+        {
+            var ten = Math.floor(Math.random() * 9) + 1;
+            var sum = Math.floor(Math.random() * 9) + 1;
+            var v1 = Math.floor(Math.random() * sum);
+            var v2 = sum - v1;
+
+            var op = Math.random() < 0.5 ? '+' : '-';
+
+            if(op == '+')
+            {
+                return ten + (v1 + "+" + v2 + "=?");
+            }else{
+                return ten + (sum + "-" + v2 + "=?");
+            }
+        }
+
+        function nextN(n) {
+            var arr = [];
+            for(var i = 0;i < n; i ++){
+                arr[i] = next();
+            }
+
+            document.getElementById("v").innerText = arr.join("\n");
+        }
+
+    </script>
+    <style type="text/css">
+        #v{
+            font-size: 15vw;   
+            text-align: center;     
+            padding-top: 10vw;
+            padding-bottom: 20vw;    
+            text-shadow: 0 0 1vw #000, 0 0 5vw #00f; 
+            color: #ffffff;
+        }
+
+        body{
+            background: url("http://www.ddooo.com/uppic/190806/201908060950311794.jpg");
+            background-repeat:no-repeat;
+            background-size: cover;
+            background-position: center 0;
+        }
+    </style>
+</head>
+<body style="margin: auto; text-align: center; ">
+    <per id="v" onclick="nextN(8)">点击出题</per>
+</body>
