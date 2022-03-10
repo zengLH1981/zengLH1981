@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html>
+    <HEAD>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            *{
+                box-sizing: border-box;
+            }
+            html{
+                margin: 0;
+                padding: 0;
+            }
+            body{
+                margin: 0;
+                padding: 1vw;
+                width: 100%;
+            }
+            #node{
+                width: 100%;
+                height: 20vw;
+            }
+            #music{
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                
+            }
+            #base{
+                width: 100%;
+                height: 5vw;
+                display: grid;                
+
+                grid-template-rows: 1fr 1fr;
+                grid-template-columns: 3vw 10vw 1fr;
+                
+            }
+
+            #tap1{
+                grid-row: 1;
+                grid-column: 1;
+                border-bottom: solid 0.2vw black;
+                text-align: center;
+                font-size: 2vw;
+            }
+            #tap2{
+                grid-row: 2;
+                grid-column: 1;
+                text-align: center;
+                font-size: 2vw;
+            }
+
+            
+            #freq{
+                grid-row: 1 / span 2;
+                grid-column: 2;      
+                display:flex;
+    align-items:center;
+    justify-content:center;          
+    font-size: 2vw;                    
+            }
+            #freq::before{
+                content: "🎵=";
+            }
+            
+
+            #title{
+                grid-row: 1 / span 2;
+                grid-column: 3;           
+                display:flex;
+    align-items:center;
+    justify-content:center;     
+    font-size: 5vw;
+    line-height: 5vw;
+    font-weight: bold;
+    font-family: serif; 
+            }
+
+
+            @media print{
+                #input{
+                    display: none;
+                }
+            }
+            
+        </style>
+        <script>
+
+            const API_VERSION=6;
+            const API_TOKEN='5423891ebb6898ea2fba912f08e188285811863b';
+
+function get(url, params, callback)
+    {
+        var xmlhttp=new XMLHttpRequest();
+
+        if(params)
+        {
+            var a = [];
+            for (const key in params) {
+                if (Object.hasOwnProperty.call(params, key)) {
+                   
+                    
+                    a.push(key + "=" + encodeURIComponent(params[key]));
+                }
+            }
+ 
+
+            url = url + "?" + a.join("&");
+        }
+
+        xmlhttp.onreadystatechange=function()
+            {
+                if (xmlhttp.readyState==4 && xmlhttp.status==200)
+                {
+                    console.log(xmlhttp.responseText);
+                    var json = JSON.parse(xmlhttp.responseText);
+
+                    callback(json);
+                }
+            };
+
+
+        xmlhttp.open("GET",url,true);
+        xmlhttp.send();
+
+        
+    }
+
+    
+function post(url, params, callback)
+    {
+        var xmlhttp=new XMLHttpRequest();
+
+ 
+
+        xmlhttp.onreadystatechange=function()
+            {
+                if (xmlhttp.readyState==4 && xmlhttp.status==200)
+                {
+                    console.log(xmlhttp.responseText);
+                    var json = JSON.parse(xmlhttp.responseText);
+
+                    callback(json);
+                }
+            };
+
+
+        xmlhttp.open("POST",url,true);
+        xmlhttp.send(JSON.stringify(params));
+
+        
+    }
+
+    
+    ///
+            function onSave(){
+
+    var base = parseBase();
+
+    if(!base)
+    { 
+        return;
+    }
+
+    post("https://v4pre.h5sys.cn/api/10913258/addMusic?version="+API_VERSION, {
+        name:base.title, code: document.getElementById("node").value,
+        token:API_TOKEN
+    }, json=>{
+
+        alert(json.ok);
+})
+
+
+            }
+
+            ///
+            function parseBase()
+            {
+                    var m1 = /^\s*(\d+)\/(\d+)\s+~(\d+)\s+(.*)$/m.exec(document.getElementById("node").value);
+
+                    if(!m1)
+    {
+        alert("基础信息错误");
+        return;
+    }
+    
+    return {
+        tapu:m1[1],
+        tapd: m1[2],
+        freq: m1[3],
+        title: m1[4].trim()
+
+    };
+            }
+
+
+            ///
+function onShow(){
+    var base=parseBase();
+ 
+
+    if(!base)
+    { 
+        return;
+    }
+
+    document.getElementById("tap1").innerText = base.tapu;
+    document.getElementById("tap2").innerText = base.tapd;
+    document.getElementById("freq").innerText = base.freq;
+    document.getElementById("title").innerText = base.title;
+
+    document.getElementById("music").classList.remove("tap-2_4");
+    document.getElementById("music").classList.remove("tap-3_4");
+    document.getElementById("music").classList.remove("tap-4_4");
+    document.getElementById("music").classList.add("tap-" + base.tapu + "_" + base.tapd);
+
+    segsperline = {
+        2:4,3:3,4:2
+    }[base.tapu]
+
+
+    var reg=/(.*?)\|/gm;
+
+    var codes=[];
+    var links={
+        start:false,
+        ing:false,
+        linknodes:[],
+        nmlnodes:[],
+        idx:0
+    };
+
+    
+    var i = 0;
+    do{
+        var m2 = reg.exec(document.getElementById("node").value);
+        if(m2){
+            if(i == 0){
+                codes.push(tag("lk"));
+            }
+
+            var re = parseSeg(m2[1], links);  
+            i ++;
+            i %= segsperline;
+            codes.push(re);
+
+
+            if(i == 0){
+                if(links.linknodes.length)
+                {
+                    links.nmlnodes.push(tag("lkseg", links.linknodes.join(""), {
+                        class:"lkseg-half-start"
+                    }));
+                }
+
+                
+                codes[codes.length - segsperline - 1] = tag("lk", links.nmlnodes.join(""));
+                links={
+                    start:false,
+                    ing:links.ing,
+                    linknodes:[],
+                    nmlnodes:[],
+                    idx : links.idx
+                };
+            }
+
+                      
+        }else{
+            break;
+        }
+    }while(1);
+
+    
+
+    if(links.linknodes.length)
+                {
+                    links.nmlnodes.push(tag("lkseg", links.linknodes.join(""), {
+                        class:"lkseg-half-start"
+                    }));
+                }
+
+                if(links.nmlnodes.length){
+                codes[codes.length - segsperline - 1] = tag("lk", links.nmlnodes.join(""));
+                }
+
+
+
+ 
+
+    document.getElementById("music").innerHTML = codes.join("");
+
+    // var nodes = document.getElementsByTagName("node");
+    
+    // for (const nd of nodes) { 
+    //     var lknd = document.getElementById("lk"+nd.id);
+    //     if(lknd)
+    //     {
+    //         var grpw = nd.parentElement.clientWidth;
+    //         var segw = nd.parentElement.parentElement.clientWidth;
+    //         lknd.width = nd.width;
+    //     }
+    // }
+
+    window.setTimeout(()=>{
+        var lksegs = document.getElementsByTagName("lkseg");
+
+        for (const lkseg of lksegs) {
+            placeLink(lkseg)        
+            
+        }
+    },100);
+}
+
+function placeLink(lkseg){
+    var lkstart = lkseg.getElementsByTagName("lkstart")[0];
+    var lkend = lkseg.getElementsByTagName("lkend")[0];
+
+    var nd0=null;
+    var nd1=null;
+    if(lkstart)
+    {
+        nd0 = getNodeInfo(lkstart.id.slice(2));
+
+    }
+
+    if(lkend)
+    {
+        nd1 = getNodeInfo(lkend.id.slice(2));
+
+    }
+
+    if(lkstart){
+        if(lkend){
+            lkseg.style.gridColumn = Math.floor( nd0.left + 1) + "/ span " + Math.floor(nd1.left - nd0.left + nd1.width);
+        }
+        else{
+            lkseg.style.gridColumn = Math.floor( nd0.left + 1) + "/ span " + (1000 - Math.floor( nd0.left));
+        }
+    }else{
+        lkseg.style.gridColumn = 1 + "/ span " + Math.floor(nd1.left + nd1.width);
+    }
+    
+}
+
+function getNodeInfo(id)
+{
+    var nd = document. getElementById(id);
+
+    if(!nd) return  {
+        left: 0,
+        width: 0
+    };
+    var num = nd.getElementsByTagName("num")[0];
+    var wnd = num.offsetWidth;
+    var musice = document.getElementById("music");
+    var lmusice = musice.offsetLeft;
+    var lnd = num.offsetLeft;
+
+    return {
+        left: (lnd - lmusice) * 1000 / musice.offsetWidth,      
+        width: num.offsetWidth * 1000 / musice.offsetWidth,        
+    }
+
+}
+
+function tag(tag, html, attrs){
+    var s = [];
+
+    s.push("<" + tag );
+
+    if(attrs){
+        for (const key in attrs) {
+            if (Object.hasOwnProperty.call(attrs, key)) {
+                const element = attrs[key];
+            
+                s.push("  ");
+                s.push(key)        ;
+                s.push("=");
+                s.push("\"");
+                s.push(element);
+                s.push("\"");
+            }
+        }
+    }
+
+    s.push(">");
+
+    s.push(html);
+    
+    s.push("</" + tag );
+
+    s.push(">");
+
+    return s.join("");
+}
+
+function parseSeg(seg, links)
+{
+    var reg=/(.+?)(\s+|$)/g;
+
+    var grps=[];
+    do{
+        var m2 = reg.exec(seg);
+        if(m2){
+            var re = parseGrp(m2[1], links);            
+            grps.push(re);
+        }else{
+            break;
+        }
+    }while(1);
+
+    return tag("seg", grps.join("" ), {
+        class: "grps-"+grps.length
+    }  );
+}
+
+function parseGrp(nodes, links){
+    var reg=/\(?\d[^0-9(]*/g;
+
+    var nds=[];
+    do{
+        var m2 = reg.exec(nodes);
+        if(m2){
+            var re = parseNode(m2[0], links);            
+            nds.push(re);
+        }else{
+            break;
+        }
+    }while(1);
+
+
+    return tag("grp" , nds.join(""), {
+        class: "nds-"+nds.length
+    } );
+}
+
+
+function parseNode(node, links){
+    var cls = ["node"];
+    var linkstart = false;
+    var n = node.charAt(0);
+    if(n == '('){
+        n = node.charAt(1);
+        linkstart = true;
+    }
+
+    var width = [0];
+
+    countCharClass(node, "'", c=>{
+        cls.push("node-up-" + c);
+    });
+
+    
+    countCharClass(node, ",", c=>{
+        cls.push("node-down-" + c);
+    });
+    
+    
+    countCharClass(node, ".", c=>{
+        cls.push("node-half");
+        width[0] += 1;
+    });
+
+    countCharClass(node, "_", c=>{
+        cls.push("node-spl-" + c);        
+    });
+
+    countCharClass(node, "-", c=>{
+        cls.push("node-mul-" + c);
+        width[0] += 2 * c;
+    });
+
+
+    cls.push("node-width-" + width[0]);
+
+
+    var re = [];
+
+ 
+
+    re.push("<up></up>")
+    re.push("<num>"+n+"</num>");
+    re.push("<down></down>")
+    re.push("<spl></spl>")
+    re.push("<half></half>")
+    re.push("<mul></mul>")
+
+    var renode = tag("node", re.join(""), {
+        class: cls.join(" "),
+        id: "node-" + links.idx
+    });
+
+    
+ 
+    var lkcls = [];
+    var lknode = false;
+    var lktag = null;
+    if(linkstart)
+    {
+        lkcls.push("link-start");
+        links.ing = true;
+        links.start = true;
+        lknode = true;
+        lktag = "lkstart";
+
+    }else{
+        if( links.ing)
+        {
+            
+            countCharClass(node, ")", c=>{
+                lkcls.push("link-end");
+                links.ing = false;
+                lktag = "lkend";
+            });
+
+            lknode = true;
+        }
+
+        if( links.ing)
+        {
+            lknode=false
+            lkcls.push("link-mid");
+        }
+    }
+
+    if( lknode ){
+        links.linknodes.push(tag(lktag || "lknode", "", {
+            class:lkcls.join(" "),
+            id:"lknode-"+ links.idx
+        }));
+
+        if( !links.ing)
+        {
+            links.nmlnodes.push(tag("lkseg", links.linknodes.join(""), {
+                class:links.start ? "lkseg-full":"lkseg-half-end"
+            }));
+            links.linknodes =[];
+        }
+    }else{
+        // links.nmlnodes.push(tag("lknode", "", {
+        //     class:lkcls.join(" "),
+        //     id:"lknode-"+ links.idx
+        // }));
+    }
+
+    links.idx++;
+    return renode;
+}
+
+function countCharClass(node, c, cb)
+{
+    var n = countChar(node, c);
+    if(n > 0)
+    {
+        cb(n);
+    }
+}
+function countChar(node, c)
+{
+    var n = 0;
+    var l = node.length; a = [];  //获取当前字符串长度，并定义空数组
+    if (l) {  //如果存在则执行循环操作，预防空字符串
+        for (var i = 0; i < l; i ++) {  //遍历字符串，枚举每个字符
+            if(node.charAt(i) == c)
+            {
+                    n ++;
+            }
+        }
+    }
+
+    return n;
+}
+        </script>
+
+        <style>
+:root {
+  --num-size: 3.5vw;
+  --num-width: calc(var(--num-size) * 0.7);
+}            
+            .node{
+                font-weight: bold;
+                display: inline-grid;
+                grid-template-columns: var(--num-width) 0fr 0fr;
+                grid-template-rows: 10fr var(--num-size) 10fr 20fr;
+                height: 10vw; 
+                flex-grow: 0;
+                line-height: 0;
+                letter-spacing: 0;
+                word-spacing: 0;
+                width: var(--num-width);
+            }
+
+            .node.node-half{
+                grid-template-columns: var(--num-width)  1fr 0fr;
+                width: calc(1.4*var(--num-width) );
+            }
+
+            .node.node-mul-1{
+                grid-template-columns: var(--num-width)  0fr 1fr;
+                width: calc(2*var(--num-width) );
+            }
+            .node.node-mul-2{
+                grid-template-columns: var(--num-width)  0fr 1fr;
+                width: calc(3*var(--num-width) );
+            }
+            .node.node-mul-3{
+                grid-template-columns: var(--num-width)  0fr 1fr;
+                width: calc(34*var(--num-width) );
+            }
+            .node.node-mul-3{
+                grid-template-columns: var(--num-width)  0fr 1fr;
+                width: calc(5*var(--num-width) );
+            }
+            /* .node-width-0{
+                min-width:  4em;
+            }
+            .node-width-1{
+                min-width:  4.5em;
+            }
+            .node-width-2{
+                min-width:  8em;
+            }
+            .node-width-3{
+                min-width:  8.5em;
+            }
+            .node-width-4{
+                min-width:  12em;
+            }
+            .node-width-5{
+                min-width:  12.5em;
+            }
+            .node-width-6{
+                min-width:  16em;
+            }
+            .node-width-7{
+                min-width:  16.5em;
+            } */
+/* 
+            .nds-1 node{
+                width: 100%;
+            }
+            .nds-2 node{
+                width: 50%;
+            }
+            .nds-3 node{
+                width: 33.33%;
+            }            
+            .nds-4 node{
+                width: 25%;
+            }
+            .nds-5 node{
+                width: 20%;
+            }
+            .nds-6 node{
+                width: 16.66%;
+            }
+            .nds-7 node{
+                width: 14.28%;
+            }            
+            .nds-8 node{
+                width: 12.5%;
+            } */
+
+            up{
+                grid-column: 1;
+                grid-row: 1;
+                text-align: center;
+                font-size: var(--num-size);
+                height: 0;
+                max-height: 0;
+            }
+            
+            
+            num{
+                grid-column: 1;
+                grid-row: 2;
+                text-align: center;
+                font-size: var(--num-size);
+                line-height: var(--num-size);
+            }
+            
+            half{
+                grid-column: 2;
+                grid-row: 2;
+                font-size: var(--num-size);
+                width: calc(0.4 * var(--num-width));
+                transform: translateY(calc(0.5 * var(--num-size)));
+            }
+
+            
+            
+            mul{
+                grid-column: 3;
+                grid-row: 2;
+                font-size: var(--num-size);
+            }
+
+            down{
+                grid-column: 1;
+                grid-row: 3;
+                text-align: center;
+                font-size: var(--num-size);
+                height: 0;
+                max-height: 0;
+            }
+            
+            spl{
+                grid-column: 1 / span 3;
+                grid-row: 4;
+                text-align: center;
+                height: 0;
+                max-height: 0;
+                width: 100%;
+                display: grid;
+                grid-template-columns: 1;
+                grid-template-rows: 2;
+            }
+
+
+            .node-up-1 up::before{
+                content: ".";
+                line-height: 0;
+                height: 0; 
+            }
+            .node-up-1 up{ 
+                transform: translateY(-0.2vw);
+            }
+            .node-down-1 down::before{
+                content: ".";
+                height: 0;
+                line-height: 0;
+            }
+            .node-down-1 down{
+                transform: translateY(-0.3vw);
+            }
+            .node-up-2 up::before{
+                content: ":";
+                height: 0;
+                line-height: 0;
+            }
+            .node-down-2 down::before{
+                content: ":";
+                height: 0;
+                line-height: 0;
+            }
+
+
+
+            .node-half half::before{
+                content: ".";
+            }
+
+            .node.node-mul-1 mul {
+                content: " -";
+                width: calc(1 * var(--num-size));
+            }
+            .node.node-mul-1 mul::before {
+                content: " -";
+            }
+            .node.node-mul-2 mul {
+                content: " -";
+                width: calc(1.6 * var(--num-size));
+            }
+            .node.node-mul-2 mul::before {
+                content: " - -";
+            }
+            .node.node-mul-3 mul {
+                content: " -";
+                width: calc(2.4 * var(--num-size));
+            }
+            .node.node-mul-3 mul::before {
+                content: " - - -";
+            }
+            .node.node-mul-4 mul {
+                content: " -";
+                width: calc(3.2 * var(--num-size));
+            }
+            .node.node-mul-4 mul::before {
+                content: " - - - -";
+            }
+            .node mul {
+                transform: translateY(calc(0.5 * var(--num-width)));                
+            }
+
+            .node spl::before{
+                grid-row: 1;
+                height: 0.5vw;
+            }
+
+            .node spl::after{
+                grid-row: 2;
+                height: 0.5vw;
+            }
+            
+            .node.node-spl-1 spl::before{
+                content: " ";
+                border-top: solid 0.3vw black;
+            }
+            .node.node-spl-2 spl::before{
+                content: " "; 
+                border-top: solid 0.3vw black;
+                border-bottom: solid 0.3vw black;
+            }
+
+            
+            .node.node-spl-3 spl::before{
+                content: " ";
+                border-top: solid 0.3vw black;
+                border-bottom: solid 0.3vw black;
+            }
+            
+            .node.node-spl-3 spl::after{
+                content: " ";
+                border-top: solid 0.3vw black; 
+            }
+
+
+            .node.node-spl-4 spl::before{
+                content: " "; 
+                border-top: solid 0.3vw black;
+                border-bottom: solid 0.3vw black;
+            }
+            .node.node-spl-4 spl::after{
+                content: " "; 
+                border-top: solid 0.3vw black;
+                border-bottom: solid 0.3vw black;
+            }
+
+            seg{
+                border-right: solid 0.3vw black;
+                display: flex;
+                margin-bottom: 2vw;
+                align-items: center;
+            }
+
+            .tap-2_4 seg{
+                width:  25%;
+            }
+            .tap-3_4 seg{
+                width:  33.3%;
+            }
+            .tap-4_4 seg{
+                width:  50%;
+            }
+
+            grp{ 
+                flex-grow: 1;display: flex;
+                align-items: flex-start;
+                padding-left: 0.5vw;
+                padding-right: 0.5vw;
+            }
+
+            lk{
+                width: 98vw;
+                height: 2vw;
+                /* background-color: oldlace; */
+                /* display: block; */
+                display: grid;
+                grid-template-rows: 1fr;
+                grid-template-columns: repeat(1000, 1fr);
+                padding-top: 0.5vw;
+                /* display: flex; */
+            }
+
+            lkseg{
+                grid-row: 1; 
+                margin-left: calc(0.3 * var(--num-width));
+                margin-right: calc(0.3 * var(--num-width));
+            }
+
+            lkseg.lkseg-full{
+                border: solid 2px black;
+                border-bottom: 0;
+                border-left: 0;
+                border-right: 0;
+
+                border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+            }
+            
+            lkseg.lkseg-half-start{
+                border: solid 2px black;
+                border-bottom: 0;
+                border-left: 0;
+                border-right: 0;
+
+                border-radius: 50% 0 0 0 / 100% 0 0 0;
+            }
+            lkseg.lkseg-half-end{
+                border: solid 2px black;
+                border-bottom: 0;
+                border-left: 0;
+                border-right: 0;
+
+                border-radius: 0 50% 0 0 / 0 100% 0 0;;
+            }
+            /* grp.grp-1{ 
+                min-width:  100%;
+            }
+            grp.grp-2{ 
+                min-width:  50%;
+            }
+            grp.grp-3{ 
+                min-width:  33.3%;
+            }
+            grp.grp-4{ 
+                min-width:  25%;
+            } */
+        </style>
+
+
+<script>
+    function loadName(){
+        var m = /t=([^&]+)/g.exec(location.search)
+        
+        if(m){
+            console.log(m[1])
+
+            getMusic(m[1]); 
+        }
+
+        listMusic(1)
+    }
+
+    function getMusic(name){
+ 
+        if(name){ 
+
+            post("https://v4pre.h5sys.cn/api/10913258/getMusic?version=" + API_VERSION,{
+                name:name
+            }, json=>{
+                document.getElementById("node").value = json.code;
+                onShow()
+            });
+        }
+
+    }
+    function musicEvent(){
+        
+        var lst  = document.getElementById("musices");
+
+        var page = 1;
+        if(lst.selectedIndex	 >= 0)
+        {
+            var opt = lst.options[lst.selectedIndex];
+            page = parseInt(opt.value);
+            if(page > 0){
+                listMusic(page)
+            }else{
+                getMusic(opt.value);
+            }
+        }else{
+            if(lst.options.length == 0)
+            {
+                    listMusic(1)
+            }
+        }
+
+
+    }
+
+    function listMusic(page){
+        post("https://v4pre.h5sys.cn/api/10913258/listMusic?version=" + API_VERSION,{
+                        page:page, npp:10
+                    }, json=>{
+                   
+                        var opts  = [];
+
+                        if(page > 1){
+                            opts.push(tag("option", "第" + (page - 1) + "页", {
+                                value: page - 1
+                            }));
+                        }
+
+                        json.data.forEach(item => {
+                            opts.push(tag("option", item.name + "  [" + (item.更新时间 || item.创建时间) + "]", {
+                                value: item.name
+                            }));
+                        });
+
+                        
+                            
+                        opts.push(tag("option", "第" + (page + 1) + "页", {
+                                value: page + 1
+                            }));
+
+
+                            var lst  = document.getElementById("musices");
+                            lst.innerHTML = opts.join("");
+                            lst.selectedIndex = -1;
+                            lst.value = null;
+                    });
+    }
+</script>
+    </HEAD>
+    <body onload="javascript:loadName()">
+        <div id="input">
+            保存的曲谱：<select id="musices" style="width: 70vw;" onchange="javascript:musicEvent()">
+ 
+            </select>
+            <br />
+        <textarea id="node">
+2/4 ~60 gogogo
+1 2|3 4|5- 4|(1_2_|3') 5,|
+3_4_ (1_2_)|3. (5_|1---)|1_2__3__|1__2__(3'__4,__)|(1__2__3'__4,__ 1__2__3'__4,__)|
+7_.1__ 1|
+        </textarea>
+        <br />
+        <button id="btnShow" onclick="javascript:onShow()">刷新</button>
+        <button id="btnSave" onclick="javascript:onSave()">保存</button>
+    </div>
+        <div id="base">
+            <div id="tap1"></div>
+            <div id="tap2"></div>
+            <div id="freq"></div>
+            <div id="title"></div>
+            </div>
+        <div id="music">
+
+        </div>
+
+        <script>
+
+
+        </script>
+    </body>
+</html>
