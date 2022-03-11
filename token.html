@@ -3,6 +3,8 @@
     <HEAD>
 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <!-- <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js" ></script> -->
         <style>
             *{
                 box-sizing: border-box;
@@ -32,7 +34,8 @@
                 display: grid;                
 
                 grid-template-rows: 1fr 1fr;
-                grid-template-columns: 3vw 10vw 1fr;
+                grid-template-columns: 3vw 10vw 15vw 1fr;
+                margin-bottom: 5vw;
                 
             }
 
@@ -66,7 +69,7 @@
 
             #title{
                 grid-row: 1 / span 2;
-                grid-column: 3;           
+                grid-column: 4;           
                 display:flex;
     align-items:center;
     justify-content:center;     
@@ -76,12 +79,22 @@
     font-family: serif; 
             }
 
-
-            @media print{
-                #input{
-                    display: none;
-                }
+            #xian{
+                
+                grid-row: 1 / span 2;
+                grid-column: 3;    
+                display:flex;
+    align-items:center;
+    justify-content:center;          
+    font-size: 2vw;        
             }
+            #xian.xian-D::before{
+                content: "1=D (1,5 弦)";
+            }
+            #xian.xian-G::before{
+                content: "1=G (5,2 弦)";
+            }
+
             
         </style>
         <script>
@@ -176,7 +189,7 @@ function post(url, params, callback)
             ///
             function parseBase()
             {
-                    var m1 = /^\s*(\d+)\/(\d+)\s+~(\d+)\s+(.*)$/m.exec(document.getElementById("node").value);
+                    var m1 = /^\s*(\w)\s+(\d+)\/(\d+)(\!\d+)?\s+~(\d+)\s+(.*)$/m.exec(document.getElementById("node").value);
 
                     if(!m1)
     {
@@ -185,14 +198,24 @@ function post(url, params, callback)
     }
     
     return {
-        tapu:m1[1],
-        tapd: m1[2],
-        freq: m1[3],
-        title: m1[4].trim()
+        xian:m1[1],
+        tapu:m1[2],
+        tapd: m1[3],
+        spl: m1[4] ? parseInt(m1[4].slice(1)) : 0,
+        freq: m1[5],
+        title: m1[6].trim()
 
     };
             }
 
+            ///
+            function clearClass(classList)
+            {
+                for (let icls = 0; icls <  classList.length; icls++) {
+        
+                   classList.remove( classList[icls]);
+                 }
+            }
 
             ///
 function onShow(){
@@ -204,19 +227,28 @@ function onShow(){
         return;
     }
 
+    segsperline = base.spl || ({
+        2:4,3:3,4:2
+    }[base.tapu]);
+
     document.getElementById("tap1").innerText = base.tapu;
     document.getElementById("tap2").innerText = base.tapd;
     document.getElementById("freq").innerText = base.freq;
     document.getElementById("title").innerText = base.title;
+    document.getElementById("xian").classList.add("xian-" + base.xian);
 
     document.getElementById("music").classList.remove("tap-2_4");
     document.getElementById("music").classList.remove("tap-3_4");
     document.getElementById("music").classList.remove("tap-4_4");
-    document.getElementById("music").classList.add("tap-" + base.tapu + "_" + base.tapd);
 
-    segsperline = {
-        2:4,3:3,4:2
-    }[base.tapu]
+
+    var ndmusic =  document.getElementById("music");
+    clearClass(ndmusic.classList);
+    
+    ndmusic.classList.add("tap-" + base.tapu + "_" + base.tapd);
+    ndmusic.classList.add("tap-spl-" +base.spl);
+    // ndmusic.classList.add("print");
+
 
 
     var reg=/(.*?)\|/gm;
@@ -232,10 +264,12 @@ function onShow(){
 
     
     var i = 0;
+    var lkidx = 0;
     do{
         var m2 = reg.exec(document.getElementById("node").value);
         if(m2){
             if(i == 0){
+                lkidx = codes.length;
                 codes.push(tag("lk"));
             }
 
@@ -254,7 +288,7 @@ function onShow(){
                 }
 
                 
-                codes[codes.length - segsperline - 1] = tag("lk", links.nmlnodes.join(""));
+                codes[lkidx] = tag("lk", links.nmlnodes.join(""));
                 links={
                     start:false,
                     ing:links.ing,
@@ -280,7 +314,7 @@ function onShow(){
                 }
 
                 if(links.nmlnodes.length){
-                codes[codes.length - segsperline - 1] = tag("lk", links.nmlnodes.join(""));
+                codes[lkidx] = tag("lk", links.nmlnodes.join(""));
                 }
 
 
@@ -308,6 +342,8 @@ function onShow(){
             placeLink(lkseg)        
             
         }
+
+        // onPrint()
     },100);
 }
 
@@ -570,6 +606,7 @@ function countChar(node, c)
 
     return n;
 }
+
         </script>
 
         <style>
@@ -833,6 +870,15 @@ function countChar(node, c)
                 align-items: center;
             }
 
+            #music seg:last-child::after{
+                border-right: solid 0.6vw black;
+                content: "";
+                width: 1vw;
+                height: 100%;
+                /* background-color: black; */
+                transform: translateX(1.2vw);
+            }
+
             .tap-2_4 seg{
                 width:  25%;
             }
@@ -841,6 +887,23 @@ function countChar(node, c)
             }
             .tap-4_4 seg{
                 width:  50%;
+            }
+
+            
+            .tap-spl-8 seg{
+                width:  12.5% !important;
+            }
+            .tap-spl-6 seg{
+                width:  16.6% !important;
+            }
+            .tap-spl-4 seg{
+                width:  25% !important;
+            }
+            .tap-spl-3 seg{
+                width:  33.3% !important;
+            }
+            .tap-spl-2 seg{
+                width:  50% !important;
             }
 
             grp{ 
@@ -855,6 +918,7 @@ function countChar(node, c)
                 height: 2vw;
                 /* background-color: oldlace; */
                 /* display: block; */
+                /* border: solid 1px black; */
                 display: grid;
                 grid-template-rows: 1fr;
                 grid-template-columns: repeat(1000, 1fr);
@@ -991,6 +1055,40 @@ function countChar(node, c)
                     });
     }
 </script>
+
+<style>
+    /* canvas{
+        display: none;
+    } */
+
+    .printed{
+        display: none !important;
+    }
+
+    @media print{
+    
+                #input{
+                    display: none;
+                }
+   
+            }
+</style>
+<script>
+    
+    function onPrint(){
+        var cs = document.getElementsByTagName("canvas");
+
+        for (let index = 0; index < cs.length; index++) {
+            const element = cs[index];
+            element.parentElement.remove(element);
+        }
+
+        html2canvas(document.querySelector("#music")).then(canvas => {
+    document.body.appendChild(canvas);
+    document.getElementById("music").classList.add("printed")
+});
+    }
+    </script>
     </HEAD>
     <body onload="javascript:loadName()">
         <div id="input">
@@ -999,7 +1097,7 @@ function countChar(node, c)
             </select>
             <br />
         <textarea id="node">
-2/4 ~60 gogogo
+D 2/4 ~60 gogogo
 1 2|3 4|5- 4|(1_2_|3') 5,|
 3_4_ (1_2_)|3. (5_|1---)|1_2__3__|1__2__(3'__4,__)|(1__2__3'__4,__ 1__2__3'__4,__)|
 7_.1__ 1|
@@ -1007,17 +1105,20 @@ function countChar(node, c)
         <br />
         <button id="btnShow" onclick="javascript:onShow()">刷新</button>
         <button id="btnSave" onclick="javascript:onSave()">保存</button>
+        <!-- <button id="btnSave" onclick="javascript:onPrint()">打印</button> -->
     </div>
-        <div id="base">
+ 
+        <div id="base" >
             <div id="tap1"></div>
             <div id="tap2"></div>
             <div id="freq"></div>
+            <div id="xian"></div>
             <div id="title"></div>
             </div>
         <div id="music">
 
         </div>
-
+ 
         <script>
 
 
