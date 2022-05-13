@@ -618,8 +618,8 @@ function countChar(node, c)
                 font-weight: bold;
                 display: inline-grid;
                 grid-template-columns: var(--num-width) 0fr 0fr;
-                grid-template-rows: 10fr var(--num-size) 10fr 20fr;
-                height: 10vw; 
+                grid-template-rows: 10fr var(--num-size) 4fr 10fr 12fr;
+                height: 9vw; 
                 flex-grow: 0;
                 line-height: 0;
                 letter-spacing: 0;
@@ -648,6 +648,12 @@ function countChar(node, c)
                 grid-template-columns: var(--num-width)  0fr 1fr;
                 width: calc(5*var(--num-width) );
             }
+            .node.node-spl-1{
+                grid-template-rows: 10fr var(--num-size) 10fr 10fr 6fr;
+                }
+            .node.node-spl-2{
+                grid-template-rows: 10fr var(--num-size) 14fr 10fr 2fr;
+                }
             /* .node-width-0{
                 min-width:  4em;
             }
@@ -734,16 +740,16 @@ function countChar(node, c)
 
             down{
                 grid-column: 1;
-                grid-row: 3;
+                grid-row: 4;
                 text-align: center;
                 font-size: var(--num-size);
-                height: 0;
+                height: calc(var(--num-size) * 0.5);
                 max-height: 0;
             }
             
             spl{
                 grid-column: 1 / span 3;
-                grid-row: 4;
+                grid-row: 3;
                 text-align: center;
                 height: 0;
                 max-height: 0;
@@ -762,22 +768,25 @@ function countChar(node, c)
             .node-up-1 up{ 
                 transform: translateY(-0.2vw);
             }
-            .node-down-1 down::before{
-                content: ".";
-                height: 0;
-                line-height: 0;
-            }
-            .node-down-1 down{
-                transform: translateY(-0.3vw);
-            }
             .node-up-2 up::before{
                 content: ":";
                 height: 0;
                 line-height: 0;
             }
+
+
+
+            .node-down-1 down::before{
+                content: ".";
+                /* height: 0; */
+                line-height: 0;
+            }
+            .node-down-1 down{
+                transform: translateY(calc(var(--num-size) * -0.37));
+            }
             .node-down-2 down::before{
                 content: ":";
-                height: 0;
+                /* height: 0; */
                 line-height: 0;
             }
 
