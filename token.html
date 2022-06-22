@@ -491,6 +491,9 @@ function parseNode(node, links){
         cls.push("node-down-" + c);
     });
     
+    countCharClass(node, "!", c=>{
+        cls.push("node-zhi-" + c);
+    });
     
     countCharClass(node, ".", c=>{
         cls.push("node-half");
@@ -513,7 +516,7 @@ function parseNode(node, links){
     var re = [];
 
  
-
+    re.push("<zhi></zhi>")
     re.push("<up></up>")
     re.push("<num>"+n+"</num>");
     re.push("<down></down>")
@@ -704,6 +707,16 @@ function countChar(node, c)
                 width: 12.5%;
             } */
 
+            zhi{
+                grid-column: 1;
+                grid-row: 1;
+                text-align: center;
+                font-size: var(--num-size);
+                height: 0;
+                max-height: 0;
+                transform: translateY(calc(var(--num-size) * -0.4));
+            }
+
             up{
                 grid-column: 1;
                 grid-row: 1;
@@ -759,6 +772,24 @@ function countChar(node, c)
                 grid-template-rows: 2;
             }
 
+            zhi::before{ 
+                line-height: 0;
+                height: 0; 
+                font-size:  calc(var(--num-size) * 0.5);
+                font-weight: 300;
+            }
+            .node-zhi-1 zhi::before{
+                content: "一"; 
+            }
+            .node-zhi-2 zhi::before{
+                content: "二"; 
+            }
+            .node-zhi-3 zhi::before{
+                content: "三"; 
+            }
+            .node-zhi-4 zhi::before{
+                content: "四"; 
+            }
 
             .node-up-1 up::before{
                 content: ".";
