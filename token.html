@@ -251,7 +251,7 @@ function onShow(){
 
 
 
-    var reg=/(.*?)\|/gm;
+    var reg=/(.*?)[\|\{\}]/gm;
 
     var codes=[];
     var links={
@@ -263,14 +263,30 @@ function onShow(){
     };
 
     
+    var nodeText =  document.getElementById("node").value.replace( /^##.*$/gm, "");
     var i = 0;
     var lkidx = 0;
+    var nmline = 0;
     do{
-        var m2 = reg.exec(document.getElementById("node").value);
+        var m2 = reg.exec(nodeText);
         if(m2){
+
+            var nml = countCharClass(m2[0], "{", c=>{});            
+
+            if(nml)
+            {
+                nmline = nml;
+                continue;
+            }
+            
+            if(m2[0].indexOf('}') >= 0)
+            { 
+                continue;
+            }
+
             if(i == 0){
                 lkidx = codes.length;
-                codes.push(tag("lk"));
+                codes.push(tag("lk"))
             }
 
             var re = parseSeg(m2[1], links);  
@@ -288,7 +304,11 @@ function onShow(){
                 }
 
                 
-                codes[lkidx] = tag("lk", links.nmlnodes.join(""));
+                codes[lkidx] = tag("lk", links.nmlnodes.join(""),{
+                    class: "mline-" + nmline
+                });
+                nmline = 0;
+
                 links={
                     start:false,
                     ing:links.ing,
@@ -432,11 +452,12 @@ function tag(tag, html, attrs){
 
 function parseSeg(seg, links)
 {
+    console.log("parseSeg: [", seg, "]");
     var reg=/(.+?)(\s+|$)/g;
 
     var grps=[];
     do{
-        var m2 = reg.exec(seg);
+        var m2 = reg.exec(seg.trim());
         if(m2){
             var re = parseGrp(m2[1], links);            
             grps.push(re);
@@ -445,13 +466,26 @@ function parseSeg(seg, links)
         }
     }while(1);
 
+    var cls = ["grps-"+grps.length]
+
+    if(seg.startsWith(":"))
+    {
+        cls.push("grp-mao-start");
+    }
+    if(seg.endsWith(":"))
+    {
+        cls.push("grp-mao-end");
+    }
+
     return tag("seg", grps.join("" ), {
-        class: "grps-"+grps.length
+        class: cls.join(" ")
     }  );
 }
 
 function parseGrp(nodes, links){
-    var reg=/\(?\d[^0-9(]*/g;
+    console.log("parseGrp: [", nodes, "]");
+
+    var reg=/\(?#?(\d|=+)[^0-9(]*/g;
 
     var nds=[];
     do{
@@ -472,15 +506,38 @@ function parseGrp(nodes, links){
 
 
 function parseNode(node, links){
+    console.log("parseNode: [", node , "]");
     var cls = ["node"];
     var linkstart = false;
-    var n = node.charAt(0);
+
+    var prex = '';
+    var ni = 0;
+    var n = node.charAt(ni);
     if(n == '('){
-        n = node.charAt(1);
+        ni ++;
+        n = node.charAt(ni);
         linkstart = true;
+    }
+    if(n == '#')
+    {
+        ni ++;
+        n = node.charAt(ni);
+        prex = 'prex-up';
     }
 
     var width = [0];
+
+    
+    var neq = countCharClass(node, "=", c=>{
+        cls.push("node-eq");
+        cls.push("node-mul-" + c);
+        width[0] += 2 * c;
+    });
+
+    if(neq){
+        n=""
+    }
+
 
     countCharClass(node, "'", c=>{
         cls.push("node-up-" + c);
@@ -511,6 +568,7 @@ function parseNode(node, links){
 
 
     cls.push("node-width-" + width[0]);
+    cls.push(prex);
 
 
     var re = [];
@@ -560,7 +618,7 @@ function parseNode(node, links){
             lknode=false
             lkcls.push("link-mid");
         }
-    }
+    } 
 
     if( lknode ){
         links.linknodes.push(tag(lktag || "lknode", "", {
@@ -593,6 +651,8 @@ function countCharClass(node, c, cb)
     {
         cb(n);
     }
+
+    return n;
 }
 function countChar(node, c)
 {
@@ -629,6 +689,15 @@ function countChar(node, c)
                 word-spacing: 0;
                 width: var(--num-width);
             }
+            .node.prex-up{
+                /* width: calc(2 * var(--num-width )); */
+            }
+            .node.prex-up::before{
+                content: "#";
+                font-weight: bold;
+                font-size: calc(0.5 * var(--num-size) );
+                transform: translate(calc(-1.2 *  var(--num-width ) ), calc(0.5 *  var(--num-width ) ));
+            }
 
             .node.node-half{
                 grid-template-columns: var(--num-width)  1fr 0fr;
@@ -645,9 +714,9 @@ function countChar(node, c)
             }
             .node.node-mul-3{
                 grid-template-columns: var(--num-width)  0fr 1fr;
-                width: calc(34*var(--num-width) );
+                width: calc(4*var(--num-width) );
             }
-            .node.node-mul-3{
+            .node.node-mul-4{
                 grid-template-columns: var(--num-width)  0fr 1fr;
                 width: calc(5*var(--num-width) );
             }
@@ -831,32 +900,80 @@ function countChar(node, c)
                 content: " -";
                 width: calc(1 * var(--num-size));
             }
-            .node.node-mul-1 mul::before {
+            .node.node-mul-1 mul::after {
                 content: " -";
             }
             .node.node-mul-2 mul {
                 content: " -";
                 width: calc(1.6 * var(--num-size));
             }
-            .node.node-mul-2 mul::before {
+            .node.node-mul-2 mul::after {
                 content: " - -";
             }
             .node.node-mul-3 mul {
                 content: " -";
                 width: calc(2.4 * var(--num-size));
             }
-            .node.node-mul-3 mul::before {
+            .node.node-mul-3 mul::after {
                 content: " - - -";
             }
             .node.node-mul-4 mul {
                 content: " -";
                 width: calc(3.2 * var(--num-size));
             }
-            .node.node-mul-4 mul::before {
+            .node.node-mul-4 mul::after {
                 content: " - - - -";
             }
+
+            
+            .node.node-eq.node-mul-1 mul::before {
+                content: "1";
+            }
+            
+            .node.node-eq.node-mul-2 mul::before {
+                content: "2";
+            }
+            
+            .node.node-eq.node-mul-3 mul::before {
+                content: "3";
+            }
+            
+            .node.node-eq.node-mul-4 mul::before {
+                content: "4";
+            }
+
+            .node.node-eq.node-mul-1 mul::after {
+                content: "━";
+            }
+            
+            .node.node-eq.node-mul-2 mul::after {
+                content: "━━";
+            }
+            
+            .node.node-eq.node-mul-3 mul::after {
+                content: "━━━";
+            }
+            
+            .node.node-eq.node-mul-4 mul::after {
+                content: "━━━━";
+            }
+            .node.node-eq mul::before { 
+                height: calc(2 * var(--num-size));
+                font-size: calc( 0.6 * var(--num-size) );
+                /* transform: translateY(calc(-2 * var(--num-width)));          */
+            }
+            .node.node-eq mul::after { 
+                height: calc(1 * var(--num-size));
+                border-left: solid black 2px;
+                border-right: solid black 2px;
+                /* transform: translateY(calc(-2 * var(--num-width)));          */
+            }
+
             .node mul {
-                transform: translateY(calc(0.5 * var(--num-width)));                
+                transform: translateY(calc(0.5 * var(--num-width)));   
+                display: flex;             
+                flex-direction: column;
+                align-items: center;
             }
 
             .node spl::before{
@@ -917,6 +1034,16 @@ function countChar(node, c)
                 height: 100%;
                 /* background-color: black; */
                 transform: translateX(1.2vw);
+            }
+
+            #music seg.grp-mao-start::before{
+                content: ":";
+                font-size: calc(1 * var(--num-size) );
+            }
+            
+            #music seg.grp-mao-end::after{
+                content: ":";
+                font-size: calc(1 * var(--num-size) );
             }
 
             .tap-2_4 seg{
@@ -996,6 +1123,20 @@ function countChar(node, c)
                 border-right: 0;
 
                 border-radius: 0 50% 0 0 / 0 100% 0 0;;
+            }
+
+            lk.mline-0::before{
+                width: 0;
+                font-size: 1vw;
+                transform: scaleY(  11 ); 
+            }
+
+            lk.mline-1::before{
+                width: 0;
+                font-size: 2vw;
+                font-weight: bold;
+                transform: translate(-2vw, 10vw) scaleY(  10 );
+                content: "【";
             }
             /* grp.grp-1{ 
                 min-width:  100%;
