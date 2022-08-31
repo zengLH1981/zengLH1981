@@ -267,6 +267,7 @@ function onShow(){
     var i = 0;
     var lkidx = 0;
     var nmline = 0;
+    var ilk = 0;
     do{
         var m2 = reg.exec(nodeText);
         if(m2){
@@ -305,9 +306,10 @@ function onShow(){
 
                 
                 codes[lkidx] = tag("lk", links.nmlnodes.join(""),{
-                    class: "mline-" + nmline
+                    class: ["mline-" + nmline, "ilk-" + (ilk % 11)].join(" ")
                 });
                 nmline = 0;
+                ilk ++;
 
                 links={
                     start:false,
@@ -1025,6 +1027,10 @@ function countChar(node, c)
                 display: flex;
                 margin-bottom: 2vw;
                 align-items: center;
+                page-break-inside:avoid;
+            }
+            seg.grps-0{
+                border-color: transparent;
             }
 
             #music seg:last-child::after{
@@ -1092,6 +1098,9 @@ function countChar(node, c)
                 padding-top: 0.5vw;
                 /* display: flex; */
             }
+            /* lk.ilk-1{
+                page-break-before: always;
+            } */
 
             lkseg{
                 grid-row: 1; 
@@ -1137,6 +1146,7 @@ function countChar(node, c)
                 font-weight: bold;
                 transform: translate(-2vw, 10vw) scaleY(  10 );
                 content: "【";
+                
             }
             /* grp.grp-1{ 
                 min-width:  100%;
@@ -1252,7 +1262,10 @@ function countChar(node, c)
                     display: none;
                 }
    
-            }
+            /* lk.ilk-10{ 
+                page-break-before: always;
+            } */
+        }
 </style>
 <script>
     
