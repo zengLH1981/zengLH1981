@@ -94,6 +94,7 @@ function onChat(){
             "method": "POST"
             
             }).then(resp=>{
+                if(resp.status == 200){
                     resp.json().then(j=>{
                         var answer  = j.choices[0].message.content;
                         newChat(answer, "answer");
@@ -102,6 +103,18 @@ function onChat(){
 
                        
         });
+
+    }else{
+        resp.json().then(j=>{
+                        var answer  = "[" + resp.status + "]" + j.error.code + "\n" + j.error.message;
+                        newChat(answer, "error");
+
+                        // $chats.push({"role": "assistant", "content":answer});
+
+                       
+        });
+
+    }
             });
 }
 
@@ -153,12 +166,24 @@ function onChat(){
                 float: right;
             }
 
+            .error{
+                align-self:flex-end;
+                background-color: lightpink;
+                margin-right: calc(var(--body-width) * 5 / 64);
+            }
+            .error::before{
+                content: ':错';
+                white-space: nowrap; 
+                width: 0; height: 0;
+                transform: translateX(calc(var(--body-width) * 25 / 640)); 
+                float: right;
+            }
 
             #chats{
-                width: translateX(calc(var(--body-width) * 580 / 640)); 
+                width: calc(var(--body-width) * 580 / 640); 
                 flex-grow: 1; border: solid 1px black; overflow-y: scroll; display: flex; 
                 flex-direction: column; 
-                padding: translateX(calc(var(--body-width) / 64)); 
+                padding: calc(var(--body-width) / 64); 
                 background-color: white; margin: 0;
             }
 
