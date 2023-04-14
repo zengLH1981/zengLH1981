@@ -1,8 +1,9 @@
-<html>
-    <head>
+
+<!-- saved from url=(0052)https://zenglh1981.github.io/zengLH1981/chatapi.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
         <title>ChatGPT</title>
-        <link rel="icon" type="image/x-icon" href="https://openai.com/favicon.ico">
+        <link rel="icon" type="image/x-icon" href="./ChatGPT_files/favicon.ico">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -57,8 +58,7 @@ function getApiKey()
     window.localStorage.setItem("apikey", k);
 
     return {
-        key:k.split(':')[0],
-        org:k.split(':')[1],
+        key:k.split(':')[0]
     };
 }
 
@@ -90,7 +90,7 @@ function onChat(){
             "headers": {
 
                     "Authorization": "Bearer " + apikey.key,
-                    "OpenAI-Organization": apikey.org,
+                    // "OpenAI-Organization": apikey.org,
                     "Content-Type": "application/json"
 
             
@@ -204,20 +204,20 @@ function onChat(){
             }
  
         </style>
-    </head>
+    <style type="text/css">#_copy{align-items:center;background:#4494d5;border-radius:3px;color:#fff;cursor:pointer;display:flex;font-size:13px;height:30px;justify-content:center;position:absolute;width:60px;z-index:1000}#select-tooltip,#sfModal,.modal-backdrop,div[id^=reader-helper]{display:none!important}.modal-open{overflow:auto!important}._sf_adjust_body{padding-right:0!important}.super_copy_btns_div{position:fixed;width:154px;left:10px;top:45%;background:#e7f1ff;border:2px solid #4595d5;font-weight:600;border-radius:2px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,PingFang SC,Hiragino Sans GB,Microsoft YaHei,Helvetica Neue,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;z-index:5000}.super_copy_btns_logo{width:100%;background:#4595d5;text-align:center;font-size:12px;color:#e7f1ff;line-height:30px;height:30px}.super_copy_btns_btn{display:block;width:128px;height:28px;background:#7f5711;border-radius:4px;color:#fff;font-size:12px;border:0;outline:0;margin:8px auto;font-weight:700;cursor:pointer;opacity:.9}.super_copy_btns_btn:hover{opacity:.8}.super_copy_btns_btn:active{opacity:1}</style></head>
     <body style="display: flex;flex-direction: column;">
 
-        <div id="chats"  >
+        <div id="chats">
 
         </div>
 
         
-        <br />
+        <br>
         <div id="formdiv">
             <textarea id="ask" style="width: 80%;height: 100%;" placeholder="输入要问的事情"></textarea>
-            <button style="width: 20%;height: 100%; background-color: transparent; border: 0;" onclick="javascript:onChat()"><img src="https://openai.com/favicon.ico"/></button>
+            <button style="width: 20%;height: 100%; background-color: transparent; border: 0;" onclick="javascript:onChat()"><img src="./ChatGPT_files/favicon.ico"></button>
         </div>
-        <br />
-        <input id="apikey"   value="" placeholder="API-KEY:Organization-ID"/> 
-    </body>
-</html>
+        <br>
+        <input id="apikey" value="" placeholder="API-KEY"> 
+    
+</body></html>
