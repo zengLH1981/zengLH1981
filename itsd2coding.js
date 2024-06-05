@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         IT报事转coding
 // @namespace    http://tampermonkey.net/
-// @version      2024-06-05.v2
+// @version      2024-06-05.v3
 // @description  内部使用
 // @author       You
-// @match        https://itsd.sunac.com.cn/admin/index.do
+// @match        https://itsd.sunac.com.cn/admin/index.do*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=sunac.com.cn
 // @grant        none
 // @license MIT
