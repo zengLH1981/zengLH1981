@@ -41,6 +41,8 @@ ajaxHooker.filter([
     {
                  document.body.innerHTML = ["<h3>参数设置</h3>"
                                             , "<h4>如果需要修改，请按 shift + S 进入此设置页面</h4>"
+                                            , "<a href='https://sunac.feishu.cn/docx/B6QId9RZyorRXexNmY0cba67n0f'>README</h4>"
+
                                       , "AssigneeId (处理人) <input id='AssigneeId' value='"+ (window.localStorage.getItem("AssigneeId")||"") +"' /> "
                                       , "ProjectName (项目英文名) <input id='ProjectName' value='"+ (window.localStorage.getItem("ProjectName")||"")+"' /> "
                                       , "IterationCode (迭代ID) <input id='IterationCode' value='"+ (window.localStorage.getItem("IterationCode")||"")+"' /> "
