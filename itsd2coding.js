@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         IT报事转coding
 // @namespace    http://tampermonkey.net/
-// @version      2024-06-05
+// @version      2024-06-05.v1
 // @description  内部使用
 // @author       You
 // @match        https://itsd.sunac.com.cn/admin/index.do
