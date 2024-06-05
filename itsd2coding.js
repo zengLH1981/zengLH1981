@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         IT报事转coding
 // @namespace    http://tampermonkey.net/
-// @version      2024-06-05.v1
+// @version      2024-06-05.v2
 // @description  内部使用
 // @author       You
 // @match        https://itsd.sunac.com.cn/admin/index.do
@@ -41,7 +41,7 @@ ajaxHooker.filter([
     {
                  document.body.innerHTML = ["<h3>参数设置</h3>"
                                             , "<h4>如果需要修改，请按 shift + S 进入此设置页面</h4>"
-                                            , "<a href='https://sunac.feishu.cn/docx/B6QId9RZyorRXexNmY0cba67n0f'>README</h4>"
+                                            , "<a href='https://sunac.feishu.cn/docx/B6QId9RZyorRXexNmY0cba67n0f' style='color:blue'>README</a>"
 
                                       , "AssigneeId (处理人) <input id='AssigneeId' value='"+ (window.localStorage.getItem("AssigneeId")||"") +"' /> "
                                       , "ProjectName (项目英文名) <input id='ProjectName' value='"+ (window.localStorage.getItem("ProjectName")||"")+"' /> "
